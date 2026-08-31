@@ -765,6 +765,7 @@ export type CourseCreateOrConnectWithoutSkillInput = {
 
 export type CourseCreateManySkillInputEnvelope = {
   data: Prisma.CourseCreateManySkillInput | Prisma.CourseCreateManySkillInput[]
+  skipDuplicates?: boolean
 }
 
 export type CourseCreateWithoutCoveredSkillsInput = {
@@ -2131,6 +2132,7 @@ export type CourseCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * The data used to create many Courses.
    */
   data: Prisma.CourseCreateManyInput | Prisma.CourseCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -2149,6 +2151,7 @@ export type CourseCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many Courses.
    */
   data: Prisma.CourseCreateManyInput | Prisma.CourseCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

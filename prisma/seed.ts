@@ -1,13 +1,11 @@
 import { PrismaClient } from "../src/lib/generated/prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 import * as bcrypt from "bcryptjs";
 import { LESSON_VIDEOS } from "./lesson-videos";
 import { COURSE_IMAGES } from "./course-images";
 import { COURSE_COVERS } from "./course-skills";
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./dev.db",
-});
+const adapter = new PrismaPg(process.env.DATABASE_URL!);
 const prisma = new PrismaClient({ adapter });
 
 function slugify(s: string) {

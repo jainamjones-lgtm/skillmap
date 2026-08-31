@@ -406,6 +406,7 @@ export type LessonCompletionCreateOrConnectWithoutLessonInput = {
 
 export type LessonCompletionCreateManyLessonInputEnvelope = {
   data: Prisma.LessonCompletionCreateManyLessonInput | Prisma.LessonCompletionCreateManyLessonInput[]
+  skipDuplicates?: boolean
 }
 
 export type LessonCompletionUpsertWithWhereUniqueWithoutLessonInput = {
@@ -453,6 +454,7 @@ export type LessonCompletionCreateOrConnectWithoutEnrollmentInput = {
 
 export type LessonCompletionCreateManyEnrollmentInputEnvelope = {
   data: Prisma.LessonCompletionCreateManyEnrollmentInput | Prisma.LessonCompletionCreateManyEnrollmentInput[]
+  skipDuplicates?: boolean
 }
 
 export type LessonCompletionUpsertWithWhereUniqueWithoutEnrollmentInput = {
@@ -1243,6 +1245,7 @@ export type LessonCompletionCreateManyArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many LessonCompletions.
    */
   data: Prisma.LessonCompletionCreateManyInput | Prisma.LessonCompletionCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1261,6 +1264,7 @@ export type LessonCompletionCreateManyAndReturnArgs<ExtArgs extends runtime.Type
    * The data used to create many LessonCompletions.
    */
   data: Prisma.LessonCompletionCreateManyInput | Prisma.LessonCompletionCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
