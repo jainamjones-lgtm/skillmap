@@ -1,0 +1,243 @@
+@import "tailwindcss";
+
+/* Warm Professionalism — see stitch_skillmap_design_system_redesign/warm_professionalism/DESIGN.md */
+@theme {
+  /* Canvas & text */
+  --color-canvas: #ffffff;
+  --color-ink: #222222;
+  --color-body: #5c3f41;
+  --color-muted: #6a6a6a;
+  --color-hairline: #dddddd;
+
+  /* Warm tonal surfaces (Material-style container ramp) */
+  --color-surface: #fdfbfa;
+  --color-surface-dim: #e9e1e0;
+  --color-surface-low: #faf6f5;
+  --color-surface-high: #f1e9e9;
+  --color-surface-variant: #f0e7e7;
+
+  /* Brand */
+  --color-primary: #ba0036;
+  --color-primary-hover: #920029;
+  --color-primary-tint: #fae8e9;
+  --color-on-primary: #ffffff;
+
+  /* Demand signals */
+  --color-demand-high: #ff385c;
+  --color-demand-medium: #ffb400;
+  --color-demand-low: #929292;
+
+  /* Semantic */
+  --color-success: #006a45;
+  --color-error: #ba1a1a;
+  --color-secondary: #7e5700;
+
+  /* Radius scale */
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* 8px base grid */
+  --spacing-gutter: 24px;
+  --spacing-margin: 80px;
+  --spacing-section: 64px;
+
+  --shadow-lift: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+  color-scheme: light;
+  background-color: var(--color-canvas);
+}
+
+body {
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Type scale — weight + line-height carry the hierarchy */
+@utility t-display {
+  @apply text-[32px] font-semibold leading-[1.2] tracking-tight md:text-[40px];
+}
+@utility t-page {
+  @apply text-[28px] font-semibold leading-[1.3] tracking-tight md:text-[32px];
+}
+@utility t-section {
+  @apply text-2xl font-semibold leading-[1.4] tracking-tight;
+}
+@utility t-card {
+  @apply text-lg font-medium leading-[1.4];
+}
+@utility t-label {
+  @apply text-sm font-semibold leading-[1.2];
+}
+@utility t-micro {
+  @apply text-[11px] font-semibold uppercase leading-[1.1] tracking-wider;
+}
+
+@utility content-max {
+  @apply mx-auto w-full max-w-[1280px] px-6 md:px-20;
+}
+/* 16px radius + hairline border — no shadow until hover */
+@utility surface-card {
+  @apply rounded-lg border border-hairline bg-canvas;
+}
+@utility card-hover {
+  @apply transition-shadow duration-300 hover:shadow-lift;
+}
+
+@utility btn {
+  @apply inline-flex h-12 items-center justify-center gap-2 rounded-full px-8 text-sm font-semibold transition duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary;
+}
+@utility btn-primary {
+  @apply btn bg-primary text-on-primary hover:bg-primary-hover;
+}
+@utility btn-secondary {
+  @apply btn border border-ink bg-canvas text-ink hover:bg-surface-variant;
+}
+@utility btn-sm {
+  @apply h-10 px-5;
+}
+
+@utility input {
+  @apply h-12 w-full rounded-lg border border-hairline bg-canvas px-4 text-sm text-ink outline-none transition duration-150 ease-out placeholder:text-muted focus:border-primary focus:ring-2 focus:ring-primary/20;
+}
+@utility field {
+  @apply mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-muted;
+}
+/* Pill-shaped chip, used for demand signals and filters */
+@utility chip {
+  @apply inline-flex items-center gap-2 rounded-full border border-hairline bg-surface-variant px-4 py-2 text-sm font-semibold text-ink transition duration-150 ease-out;
+}
+
+@utility hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility map-blob {
+  &:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 3px;
+  }
+}
+
+/* Skill map -------------------------------------------------------- */
+
+/* Hairline dot grid the territories sit on. */
+@utility map-paper {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-hairline) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@keyframes demand-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(255 56 92 / 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 14px rgb(255 56 92 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(255 56 92 / 0);
+  }
+}
+
+/* Only the highest-demand nodes pulse, so it reads as signal not decoration. */
+@utility demand-pulse {
+  animation: demand-pulse 2.4s ease-out infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+
+/* Landing hero ------------------------------------------------------ */
+
+/*
+ * Scrim over the hero photograph. It lives *inside* the photo layer, so its
+ * stops are relative to the photo rather than to the page — the photo is
+ * inset to the content column from lg but full-bleed below it, and the
+ * gradient has to track that.
+ *
+ * Below lg it runs vertically, anchored to the bottom: the copy sits on solid
+ * canvas and the photo is uncovered as a band beneath it. A left-to-right fade
+ * leaves no legible column at narrow widths, where `cover` crops to almost
+ * nothing but the subject; anchoring to the bottom also picks the kinder crop
+ * — desk, laptop and hands, rather than a face cut off at the eyes.
+ *
+ * From lg it runs left-to-right, and deliberately never reaches full white:
+ * the photograph stays legible through it right up to the left margin, so the
+ * page margin and the image read as two distinct things instead of both
+ * being blank. It holds a light, even veil across the text column and then
+ * falls off steeply, clearing the subject entirely.
+ */
+/*
+  The hero photograph fades out through a mask on the image itself, so the
+  picture dissolves toward transparent and the page shows through. An opaque
+  white overlay would flatten it to a solid block instead, which reads as a
+  hard cut.
+
+  `mask-size` and `mask-repeat` are set explicitly. Their defaults of `auto`
+  and `repeat` tile the gradient and hide the image entirely.
+*/
+@utility hero-photo {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  /* Below lg the photo holds the lower band and dissolves upward. */
+  -webkit-mask-image: linear-gradient(
+    to top,
+    #000 0px,
+    #000 150px,
+    rgb(0 0 0 / 0.34) 245px,
+    transparent 340px
+  );
+  mask-image: linear-gradient(
+    to top,
+    #000 0px,
+    #000 150px,
+    rgb(0 0 0 / 0.34) 245px,
+    transparent 340px
+  );
+
+  @media (width >= 64rem) {
+    /*
+      From lg the photo dissolves leftward under the copy. The ramp floors at
+      0.19 rather than reaching zero, because a photo that fades to nothing
+      gives no way to see how far the image extends; a faint trace is held to
+      the left edge instead. It reaches full opacity at 80%, past where the
+      copy ends.
+    */
+    -webkit-mask-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 0.19) 0%,
+      rgb(0 0 0 / 0.21) 30%,
+      rgb(0 0 0 / 0.3) 46%,
+      rgb(0 0 0 / 0.55) 60%,
+      rgb(0 0 0 / 0.89) 72%,
+      #000 80%
+    );
+    mask-image: linear-gradient(
+      to right,
+      rgb(0 0 0 / 0.19) 0%,
+      rgb(0 0 0 / 0.21) 30%,
+      rgb(0 0 0 / 0.3) 46%,
+      rgb(0 0 0 / 0.55) 60%,
+      rgb(0 0 0 / 0.89) 72%,
+      #000 80%
+    );
+  }
+}
+
+@utility btn-hero {
+  @apply inline-flex h-14 items-center justify-center rounded-full px-9 text-base font-semibold transition duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:h-16 md:px-10 md:text-lg;
+}

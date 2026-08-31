@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  name          String
+  passwordHash  String
+  role          Role          @default(STUDENT)
+  avatarColor   String        @default("#6d5efc")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  enrollments   Enrollment[]
+  reviews       Review[]
+}
+
+model Skill {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  slug         String   @unique
+  category     String
+  demandScore  Int
+  description  String
+  color        String
+  courses      Course[]
+  coveringCourses Course[] @relation("CourseCoveredSkills")
+}
+
+model Course {
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  headline     String
+  description  String
+  level        String    @default("Beginner")
+  durationMin  Int       @default(0)
+  imageUrl     String?
+  imageColor   String?
+  status       String    @default("Published")
+  category     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  skillId      String?
+  skill        Skill?    @relation(fields: [skillId], references: [id], onDelete: SetNull)
+  // Secondary skills the course also teaches. A course usually covers several
+  // skills, so the single `skill` above (the one it is primarily filed under)
+  // is not enough to answer "what can I learn this skill from?".
+  coveredSkills Skill[]  @relation("CourseCoveredSkills")
+  lessons      Lesson[]
+  enrollments  Enrollment[]
+  reviews      Review[]
+}
+
+model Lesson {
+  id        String  @id @default(cuid())
+  title     String
+  durationMin Int  @default(0)
+  content   String
+  videoUrl  String?
+  order     Int     @default(0)
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completions LessonCompletion[]
+
+  @@unique([courseId, order])
+}
+
+model Enrollment {
+  id        String      @id @default(cuid())
+  progress  Int         @default(0)
+  enrolledAt DateTime   @default(now())
+  completedAt DateTime?
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  completions LessonCompletion[]
+
+  @@unique([userId, courseId])
+}
+
+model LessonCompletion {
+  id           String     @id @default(cuid())
+  lessonId     String
+  lesson       Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  completedAt  DateTime   @default(now())
+
+  @@unique([enrollmentId, lessonId])
+}
+
+model Review {
+  id        String  @id @default(cuid())
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}

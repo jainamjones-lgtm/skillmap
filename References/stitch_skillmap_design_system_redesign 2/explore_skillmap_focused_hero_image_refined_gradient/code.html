@@ -1,0 +1,358 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>SkillMap - Market-Driven Learning</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#002113",
+                        "surface-tint": "#be0038",
+                        "secondary-fixed": "#ffdeac",
+                        "on-secondary-container": "#6a4800",
+                        "canvas": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container-high": "#ffe1e2",
+                        "surface-variant": "#fbdbdc",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#fff8f7",
+                        "secondary-container": "#feb300",
+                        "muted": "#6a6a6a",
+                        "on-tertiary-container": "#f6fff6",
+                        "primary": "#ba0036",
+                        "on-surface-variant": "#5c3f41",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#ffdada",
+                        "outline": "#906f70",
+                        "surface": "#fff8f7",
+                        "ink": "#222222",
+                        "tertiary-fixed-dim": "#62dca3",
+                        "outline-variant": "#e5bdbe",
+                        "hairline": "#dddddd",
+                        "inverse-primary": "#ffb2b6",
+                        "primary-container": "#e21e4a",
+                        "surface-container-highest": "#fbdbdc",
+                        "on-background": "#281718",
+                        "on-primary-fixed": "#40000d",
+                        "on-error": "#ffffff",
+                        "tertiary": "#006a45",
+                        "secondary": "#7e5700",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#281718",
+                        "demand-medium": "#ffb400",
+                        "tertiary-fixed": "#80f9bd",
+                        "on-tertiary-fixed-variant": "#005234",
+                        "secondary-fixed-dim": "#ffba35",
+                        "on-primary": "#ffffff",
+                        "demand-high": "#ff385c",
+                        "surface-container": "#ffe9e9",
+                        "inverse-surface": "#3f2b2c",
+                        "background": "#fff8f7",
+                        "on-secondary-fixed": "#281900",
+                        "on-primary-fixed-variant": "#920029",
+                        "inverse-on-surface": "#ffedec",
+                        "tertiary-container": "#008558",
+                        "on-secondary-fixed-variant": "#5f4100",
+                        "primary-fixed-dim": "#ffb2b6",
+                        "demand-low": "#929292",
+                        "surface-container-low": "#fff0f0",
+                        "surface-dim": "#f2d3d3",
+                        "on-primary-container": "#fffbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "gutter-md": "24px",
+                        "section-gap": "64px",
+                        "margin-mobile": "24px",
+                        "margin-desktop": "80px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["Inter"],
+                        "section-heading": ["Inter"],
+                        "label-md": ["Inter"],
+                        "card-title": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "page-heading": ["Inter"],
+                        "display-lg-mobile": ["Inter"],
+                        "micro": ["Inter"],
+                        "display-lg": ["Inter"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "section-heading": ["24px", { "lineHeight": "1.4", "fontWeight": "600" }],
+                        "label-md": ["14px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "card-title": ["18px", { "lineHeight": "1.4", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "1.1", "fontWeight": "700" }],
+                        "body-sm": ["14px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "page-heading": ["32px", { "lineHeight": "1.3", "fontWeight": "600" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "1.2", "fontWeight": "600" }],
+                        "micro": ["11px", { "lineHeight": "1.1", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "1.2", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #ffffff; color: #222222; }
+    </style>
+</head>
+<body class="font-body-lg text-ink bg-canvas antialiased selection:bg-surface-tint selection:text-white">
+<!-- TopNavBar -->
+<nav class="bg-canvas dark:bg-on-tertiary-fixed border-b border-hairline dark:border-outline-variant sticky top-0 z-50 w-full transition-shadow duration-300">
+<div class="flex justify-between items-center h-20 px-margin-mobile md:px-margin-desktop w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-gutter-md">
+<a class="text-section-heading font-section-heading font-bold text-primary dark:text-primary-fixed flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">public</span>
+                    SkillMap
+                </a>
+<div class="hidden md:flex gap-6 ml-8">
+<a class="text-primary dark:text-primary-fixed font-bold border-b-2 border-primary py-2 text-body-lg" href="#">Explore</a>
+</div>
+</div>
+<div class="hidden md:flex items-center bg-canvas border border-hairline rounded-full px-4 py-2 w-72 hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow">
+<span class="material-symbols-outlined text-muted mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-body-sm text-ink placeholder:text-muted outline-none" placeholder="Search skills, courses..." type="text">
+</div>
+<div class="flex items-center gap-4">
+<a class="hidden md:block text-ink font-label-md hover:text-primary transition-colors" href="#">Log in</a>
+<a class="bg-demand-high text-white px-6 py-3 rounded-full font-label-md hover:bg-surface-tint transition-colors shadow-sm hover:shadow-md" href="#">Sign up for free</a>
+</div>
+</div>
+</nav>
+<main>
+<!-- Hero Section -->
+<section class="relative w-full min-h-[600px] flex items-center overflow-hidden">
+<div class="absolute inset-0 z-0"><img alt="Confident modern professional in a bright workspace" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1W5BkyXk49kB76jezLk7fpJuhE1c4gh2_qP237OJQJ7PSINCR6RHWLrLK4RJU67PggaA-sgKsbixqvsFlmGg_2XYbVts4ULt-22B8WcwN-OXhxnJDtNrn9QYLkpMX_iJt1OFuAgN8levNSn8qYaK_I-D80uXWGAi-RCXCP_ll_eofjOM-QEPEdR-QR-F1KncMh9qDbfQI-Ei4puHBdqOFkjKPlcrZF9yDTfkfVVLw029F93ZnA5YMLtbw" style="object-position: 80% 50%;"><div class="absolute inset-0 bg-gradient-to-r from-canvas via-canvas to-transparent via-10%"></div></div>
+<div class="relative z-10 max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop w-full py-24">
+<div class="max-w-2xl space-y-8">
+<h1 class="text-display-lg-mobile md:text-[64px] leading-[1.05] font-display-lg text-ink font-bold tracking-tight">
+        Master the skills the <span class="text-primary">market</span> is hiring for.
+      </h1>
+<p class="text-[20px] md:text-[22px] font-body-lg text-muted leading-relaxed">
+        We analyze millions of job postings to identify the exact skills you need to advance your career today.
+      </p>
+<div class="flex flex-col sm:flex-row gap-4 pt-4">
+<a class="bg-demand-high text-white px-10 py-5 rounded-full font-label-md text-lg text-center hover:bg-surface-tint transition-all hover:-translate-y-1 shadow-lg shadow-demand-high/20" href="#">Explore the Skill Map</a>
+<a class="bg-white border border-hairline text-ink px-10 py-5 rounded-full font-label-md text-lg text-center hover:bg-surface-container-low transition-colors" href="#">Browse courses</a>
+</div>
+<div class="flex items-center gap-8 pt-12"><div class="flex flex-col"><span class="text-2xl font-bold text-ink">15k+</span><span class="text-xs font-bold text-muted uppercase tracking-wider">Active Learners</span></div></div>
+</div>
+</div>
+</section>
+<!-- Social Proof / Partner Band -->
+<!-- Discovery: Skills the market wants most -->
+<section class="py-12 bg-canvas border-b border-hairline">
+<div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+<h3 class="text-section-heading font-section-heading text-ink mb-6">Skills the market wants most</h3>
+<div class="flex overflow-x-auto pb-4 gap-4 hide-scrollbar">
+<!-- Skill Chips -->
+<button class="flex-shrink-0 bg-canvas border border-hairline rounded-full px-6 py-3 flex items-center gap-3 hover:border-demand-high hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all">
+<span class="text-label-md font-label-md text-ink">Data Analysis</span>
+<span class="text-micro font-micro bg-demand-high text-white px-2 py-0.5 rounded-full">95</span>
+</button>
+<button class="flex-shrink-0 bg-canvas border border-hairline rounded-full px-6 py-3 flex items-center gap-3 hover:border-demand-medium hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all">
+<span class="text-label-md font-label-md text-ink">Product Management</span>
+<span class="text-micro font-micro bg-demand-medium text-ink px-2 py-0.5 rounded-full">88</span>
+</button>
+<button class="flex-shrink-0 bg-canvas border border-hairline rounded-full px-6 py-3 flex items-center gap-3 hover:border-tertiary-container hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all">
+<span class="text-label-md font-label-md text-ink">UX Design</span>
+<span class="text-micro font-micro bg-tertiary-container text-white px-2 py-0.5 rounded-full">85</span>
+</button>
+<button class="flex-shrink-0 bg-canvas border border-hairline rounded-full px-6 py-3 flex items-center gap-3 hover:border-demand-high hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all">
+<span class="text-label-md font-label-md text-ink">AI Prompt Engineering</span>
+<span class="text-micro font-micro bg-demand-high text-white px-2 py-0.5 rounded-full">98</span>
+</button>
+<button class="flex-shrink-0 bg-canvas border border-hairline rounded-full px-6 py-3 flex items-center gap-3 hover:border-demand-medium hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all">
+<span class="text-label-md font-label-md text-ink">Digital Marketing</span>
+<span class="text-micro font-micro bg-demand-medium text-ink px-2 py-0.5 rounded-full">82</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Popular Courses Grid -->
+<section class="px-margin-mobile md:px-margin-desktop py-section-gap max-w-7xl mx-auto">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-page-heading font-page-heading text-ink">Popular courses</h2>
+<p class="text-body-lg font-body-lg text-muted mt-2">Learn the most in-demand skills today.</p>
+</div>
+<a class="hidden md:flex items-center text-primary font-label-md hover:underline" href="#">
+                    View all <span class="material-symbols-outlined ml-1 text-[18px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Course Card 1 -->
+<div class="group bg-canvas border border-hairline rounded-xl overflow-hidden hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow cursor-pointer flex flex-col h-full">
+<div class="relative w-full aspect-[1.5/1] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A modern, bright workspace with a person analyzing data on dual monitors. The aesthetic is professional, clean, and high-key lighting, emphasizing focus and technical proficiency in a contemporary office setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCog85SoKniJw1jaDv-R4fpfbK_k2kFYcMF_A-ddabioFv4pDKNyMcIBMhmU3h4L2BW7W5psbz5X7_khh7km6QSOI55pYHQ9ZrhPjoy8rI2ccRgmLseIETPke90mdTqxx7uhQtrX5ug2WuEcaanmcOG3YI_4OpCNxRa4OJQSS2RyMGK_-jqHqGcAzzSLp1h05c6SA3-PNu7C_EcLPEdVZEcEaOJfi1M837NFVDQr3nFmN7UfU-4yxtr">
+<div class="absolute top-3 left-3 bg-canvas/90 backdrop-blur-sm px-2 py-1 rounded-md border border-hairline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-demand-high" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-micro font-micro text-ink">High Demand</span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex gap-2 mb-2">
+<span class="text-micro font-micro bg-surface-container-low text-ink px-2 py-1 rounded-full border border-hairline">Analytics</span>
+</div>
+<h3 class="text-card-title font-card-title text-ink mb-1 group-hover:text-primary transition-colors">Advanced Marketing Analytics</h3>
+<p class="text-body-sm font-body-sm text-muted line-clamp-2 mb-4">Master data-driven marketing decisions with real-world case studies.</p>
+<div class="mt-auto pt-4 border-t border-hairline flex items-center justify-between text-body-sm font-body-sm text-muted">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-demand-medium" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium text-ink">4.9</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 6h</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">signal_cellular_alt</span> Int</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Course Card 2 -->
+<div class="group bg-canvas border border-hairline rounded-xl overflow-hidden hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow cursor-pointer flex flex-col h-full">
+<div class="relative w-full aspect-[1.5/1] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A creative professional sketching wireframes on a tablet in a bright, airy studio space. Natural light streams in, highlighting the modern, minimalist design environment and the focus on user experience design." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVpTKMGVdOzmjtU5MokPmRcfGlWqE5FGt_RHTh47lztywl0Bkq6A68wCkOTmTR-H1nSgwYrfweeWqgvP1N5h1ZMmBuJ8IFYva-4Jl_PDRqn8-G_RNccmLUXfm0bOWu1MicZpduMPv6MikZCE926qcFNc3NdisZIo5FOKJgJq-uEv1Os-JehU9t7-gUfg44d8mxYOCSH4p5Hjr4K3uhoETXGaJqIvsR4OExgDhCKbeeyRoCBmeWVjn1">
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex gap-2 mb-2">
+<span class="text-micro font-micro bg-surface-container-low text-ink px-2 py-1 rounded-full border border-hairline">Creative</span>
+</div>
+<h3 class="text-card-title font-card-title text-ink mb-1 group-hover:text-primary transition-colors">UX Research Fundamentals</h3>
+<p class="text-body-sm font-body-sm text-muted line-clamp-2 mb-4">Learn how to conduct user interviews and synthesize actionable insights.</p>
+<div class="mt-auto pt-4 border-t border-hairline flex items-center justify-between text-body-sm font-body-sm text-muted">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-demand-medium" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium text-ink">4.8</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 4.5h</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">signal_cellular_alt_1_bar</span> Beg</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Course Card 3 -->
+<div class="group bg-canvas border border-hairline rounded-xl overflow-hidden hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow cursor-pointer flex flex-col h-full">
+<div class="relative w-full aspect-[1.5/1] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="A dynamic, top-down view of a strategy meeting with diverse professionals collaborating over charts and laptops on a clean, light wood table. The scene conveys energetic teamwork and strategic planning in a modern corporate setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ_03A9VHbtAloQ-A8TaN-m6gAhgJM90tc6OaVCXHA_E79Ubpr9WsHO9300GKd73oRW_Cttfcb5NQa5a0cufGOFbb1up9Wwuh_NrOaBm0Nti_v3qUFkTrLBvyBah4dnuPHEzSedDYS5fg4QUaohIG1_5DHWt4dXdg3mOlvUTl1w_GtDf2oGoyDCR2QisW2Gvs8g5YxWDxI1nI7AJcFEV23Ewc8EDG_ufIo8XcVf45ryF26LQz8-Luy">
+<div class="absolute top-3 left-3 bg-canvas/90 backdrop-blur-sm px-2 py-1 rounded-md border border-hairline flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-demand-high" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="text-micro font-micro text-ink">High Demand</span>
+</div>
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex gap-2 mb-2">
+<span class="text-micro font-micro bg-surface-container-low text-ink px-2 py-1 rounded-full border border-hairline">Strategy</span>
+</div>
+<h3 class="text-card-title font-card-title text-ink mb-1 group-hover:text-primary transition-colors">Growth Marketing Bootcamp</h3>
+<p class="text-body-sm font-body-sm text-muted line-clamp-2 mb-4">Actionable tactics to scale user acquisition and retention rapidly.</p>
+<div class="mt-auto pt-4 border-t border-hairline flex items-center justify-between text-body-sm font-body-sm text-muted">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-demand-medium" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium text-ink">4.9</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 12h</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">signal_cellular_alt_2_bar</span> Adv</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Course Card 4 -->
+<div class="group bg-canvas border border-hairline rounded-xl overflow-hidden hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-shadow cursor-pointer flex flex-col h-full hidden sm:flex">
+<div class="relative w-full aspect-[1.5/1] overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Close up of a programmer coding on a laptop, screen showing complex algorithms, set in a cozy, softly lit room with plants. The mood is focused and serene, emphasizing modern tech skill development in a comfortable environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKWmW0xUTbNaSK74cWxCpmvYamc61n74NnOkqV-oScd-OmxaMY6g8j_NZXo5kk1mZ7l0SfjLQUJslJp5agl7SolO8uL8mB9lT62cFBvVQb7KM-zSoFNWrbbfgLk4uWs8AF2BoBgiAsCRg2mfuWMxZwTPnvaeSdrfdE5eaaqpAmM2SCJi_H0d8S6w-RhtElv-65H9xQZyLsA4jV8iWDF6HQCbs9g_ajUhPeZXJW2o8uoseYjBuFe7au">
+</div>
+<div class="p-4 flex flex-col flex-grow">
+<div class="flex gap-2 mb-2">
+<span class="text-micro font-micro bg-surface-container-low text-ink px-2 py-1 rounded-full border border-hairline">Tech</span>
+</div>
+<h3 class="text-card-title font-card-title text-ink mb-1 group-hover:text-primary transition-colors">Prompt Engineering for Teams</h3>
+<p class="text-body-sm font-body-sm text-muted line-clamp-2 mb-4">Integrate generative AI into your daily workflows effectively.</p>
+<div class="mt-auto pt-4 border-t border-hairline flex items-center justify-between text-body-sm font-body-sm text-muted">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-demand-medium" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-medium text-ink">4.7</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">schedule</span> 3h</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">signal_cellular_alt</span> Int</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<a class="md:hidden mt-8 block text-center bg-canvas border border-ink text-ink px-6 py-3 rounded-full font-label-md hover:bg-surface-container-low transition-colors" href="#">
+                View all courses
+            </a>
+</section>
+<!-- Trust Section -->
+<section class="py-16 bg-surface-container-low">
+<div class="max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<p class="text-label-md font-label-md text-muted mb-8 uppercase tracking-widest">Learn from industry-leading instructors and market data</p>
+<div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-500">
+<!-- Placeholder logos using material icons for demonstration -->
+<span class="material-symbols-outlined text-4xl">domain</span>
+<span class="material-symbols-outlined text-4xl">storefront</span>
+<span class="material-symbols-outlined text-4xl">apartment</span>
+<span class="material-symbols-outlined text-4xl">account_balance</span>
+<span class="material-symbols-outlined text-4xl">assured_workload</span>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-section-gap">
+<div class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop text-center">
+<h2 class="text-display-lg-mobile md:text-display-lg font-display-lg text-ink mb-6">Your next skill is already in the market.</h2>
+<p class="text-body-lg font-body-lg text-muted mb-8">Join thousands of professionals updating their skillsets based on real-time hiring data.</p>
+<a class="inline-block bg-demand-high text-white px-10 py-5 rounded-full font-label-md text-lg hover:bg-surface-tint transition-all hover:scale-105 shadow-md hover:shadow-[0_8px_24px_rgba(255,56,92,0.4)]" href="#">Start Learning Now</a>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container-low dark:bg-on-tertiary-fixed border-t border-hairline dark:border-outline-variant">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter-md px-margin-mobile md:px-margin-desktop py-section-gap w-full max-w-7xl mx-auto">
+<div class="col-span-1 md:col-span-1">
+<p class="text-card-title font-card-title font-bold text-ink dark:text-canvas mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">public</span>
+                    SkillMap
+                </p>
+<p class="text-body-sm font-body-sm text-muted dark:text-outline-variant">© 2024 SkillMap Learning Marketplace. All rights reserved.</p>
+</div>
+<div class="col-span-1 md:col-span-3 grid grid-cols-2 sm:grid-cols-3 gap-8">
+<div class="flex flex-col gap-3">
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">About Us</a>
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">Careers</a>
+</div>
+<div class="flex flex-col gap-3">
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">Privacy Policy</a>
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">Terms of Service</a>
+</div>
+<div class="flex flex-col gap-3">
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">Help Center</a>
+<a class="text-label-sm font-label-sm text-muted dark:text-outline-variant hover:text-ink dark:hover:text-canvas transition-colors" href="#">Market Insights</a>
+</div>
+</div>
+</div>
+</footer>
+
+
+
+
+</body></html>

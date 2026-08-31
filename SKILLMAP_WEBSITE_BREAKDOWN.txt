@@ -1,0 +1,552 @@
+================================================================================
+  SKILLMAP — COMPLETE WEBSITE BREAKDOWN (sections, UI, what it does)
+================================================================================
+  Framework: Next.js 16 App Router (React Server Components + React Client
+  Components) + Turbopack · Prisma 7 + SQLite · Tailwind v4 · shadcn/ui
+================================================================================
+
+
+TABLE OF CONTENTS
+  1. Overview / Purpose
+  2. Tech Stack & Runtime
+  3. Data Model (Prisma Schema)
+  4. Site-Wide Design System & Tokens
+  5. Global UI Shell (Nav, Footer, Layout)
+  6. Public-Facing Pages
+  7. Dashboard (Authenticated)
+  8. Course Pages & Learning Flow
+  9. Skill Pages & Skill Map
+  10. Admin Studio (CRUD)
+  11. Authentication & Authorization
+  12. Core Business Flow (User Journey)
+  13. Key Server Actions & Data Hooks
+  14. Component Catalogue
+  15. Route Map (all pages)
+  16. Running the Project
+================================================================================
+
+
+1. OVERVIEW / PURPOSE
+================================================================================
+SkillMap is a demand-driven learning platform that reads live market demand for
+marketing skills, turns it into an explorable heatmap, and lets users learn those
+skills end-to-end through structured video courses.
+
+Core idea:
+  - See which skills the market wants most (skill map heatmap).
+  - Pick a skill and discover attached courses.
+  - Enroll, work through video lessons at your own pace, track progress, and
+    review courses.
+  - Admins can create, edit, and delete courses and their lessons.
+
+================================================================================
+
+2. TECH STACK & RUNTIME
+================================================================================
+  - Next.js 16.3.3 (App Router, React Server Components by default)
+  - Turbopack (dev)
+  - Prisma 7.10.0 (ORM) → prisma-client output under src/lib/generated/prisma
+  - SQLite (better-sqlite3) — dev.db lives at repo root, NOT prisma/dev.db
+  - Tailwind v4 (CSS via @theme inline tokens)
+  - React 19.2.8; tsx; shadcn/ui primitives
+  - jose (JWT session), bcryptjs (password hashing)
+  - Zod (form validation)
+  - dotenv 17.4.2 (env; reports injected-env banner)
+
+================================================================================
+
+3. DATA MODEL (PRISMA SCHEMA)
+================================================================================
+
+  User
+    id, email (unique), name, passwordHash, role (ADMIN | STUDENT), avatarColor
+    enrollments[], reviews[]
+
+  Skill  (47 skills, demand-driven, the heart of the app)
+    id, name (unique), slug (unique), category, demandScore (0-100), description,
+    color
+    courses[]
+
+  Course  (published courses that teach a skill)
+    id, title, slug (unique), headline, description, level, durationMin,
+    imageUrl?, imageColor?, status ("Published"), category?, createdAt, updatedAt
+    skillId? -> Skill (SetNull on delete)
+    lessons[], enrollments[], reviews[]
+    (price was dropped — see migration 20260831000000_remove_course_price)
+
+  Lesson  (ordered steps inside a course)
+    id, title, durationMin, content, videoUrl?, order, courseId -> Course (Cascade)
+    completions[] ; @@unique([courseId, order])
+
+  Enrollment  (user ↔ course, the learning contract)
+    id, progress (0-100), enrolledAt, completedAt?, userId -> User (Cascade),
+    courseId -> Course (Cascade), completions[]
+    @@unique([userId, courseId])
+
+  LessonCompletion  (marks one lesson done inside an enrollment)
+    id, lessonId -> Lesson (Cascade), enrollmentId -> Enrollment (Cascade),
+    completedAt
+    @@unique([enrollmentId, lessonId])
+
+  Review  (one user's rating + optional comment on one course)
+    id, rating (1-5), comment?, createdAt, userId -> User (Cascade),
+    courseId -> Course (Cascade)
+    @@unique([userId, courseId])
+
+================================================================================
+
+  3d. Course <-> Skill coverage (many-to-many)
+      A course is filed under ONE primary skill (Course.skillId) but usually
+      teaches several. The join table "_CourseCoveredSkills" (migration
+      20260831120000_course_covered_skills) records the secondary skills each
+      course covers; the mapping lives in prisma/course-skills.ts as
+      COURSE_COVERS, keyed by course slug and listing skill NAMES.
+      Without this every skill showed exactly one course. With it the median
+      skill has ~4 courses (183 coverage links across 54 courses).
+      - getSkills()/getSkillBySlug() report _count.courses as
+        primary + covering, so the map and skill pages show the real total.
+      - getCoursesBySkill() returns primary OR covering matches, dedicated
+        course first.
+
+  3e. Course images
+      Course.imageUrl holds a verified Unsplash CDN URL; the mapping lives in
+      prisma/course-images.ts (COURSE_IMAGES by slug, plus THEME_POOL of spare
+      verified images grouped by theme). next.config.ts allows
+      images.unsplash.com via images.remotePatterns.
+
+  3f. Lesson duration
+      Lesson.durationMin is derived from the real length of its YouTube video
+      (scraped lengthSeconds, rounded to minutes), and Course.durationMin is
+      the sum of its lessons - so the stated duration always matches what the
+      learner actually watches. Policy: no video under 5 minutes (no
+      short-form/Shorts), target 10-15 minutes, longer only sparingly.
+      See VIDEO_AUDIT.md for the audit trail.
+
+4. SITE-WIDE DESIGN SYSTEM & TOKENS (Tailwind v4 @theme)
+================================================================================
+  "Warm Professionalism" — replaced the old Coinbase-style editorial system
+  (blue #0052ff accent, dark band-* sections, JetBrains Mono numerals; all
+  removed). Tokens live in src/app/globals.css as @theme variables plus
+  @utility composites. Authoritative prose spec: DESIGN.md (source spec:
+  stitch_skillmap_design_system_redesign/warm_professionalism/DESIGN.md).
+  Dark mode has been removed entirely — no .dark variant, no theme-boot
+  script, color-scheme is fixed to light.
+
+  Canvas / Text
+    --color-canvas    #ffffff
+    --color-ink       #222222   (primary text)
+    --color-body      #5c3f41   (warm body copy)
+    --color-muted     #6a6a6a   (secondary / captions)
+    --color-hairline  #dddddd   (borders / dividers)
+
+  Warm tonal surfaces (Material-style container ramp)
+    --color-surface           #fff8f7
+    --color-surface-dim       #f2d3d3
+    --color-surface-low       #fff0f0
+    --color-surface-mid       #ffe9e9
+    --color-surface-high      #ffe1e2
+    --color-surface-variant   #fbdbdc
+    --color-outline-variant   #e5bdbe
+
+  Brand
+    --color-primary         #ba0036   (warm red)
+    --color-primary-hover   #920029
+    --color-primary-tint    #ffdada
+    --color-on-primary      #ffffff
+
+  Demand signals
+    --color-demand-high     #ff385c
+    --color-demand-medium   #ffb400
+    --color-demand-low      #929292
+
+  Semantic
+    --color-success    #006a45
+    --color-error      #ba1a1a
+    --color-secondary  #7e5700
+
+  Radius / spacing / elevation
+    --radius-md/lg/xl   0.75rem / 1rem / 1.5rem
+    --spacing-gutter/margin/section   24px / 80px / 64px (8px base grid)
+    --shadow-lift       hover-only shadow (cards are flat until hover)
+
+  Typography
+    --font-sans   Inter only (var(--font-inter)); JetBrains Mono removed
+    Type scale is weight/line-height driven, not size-driven:
+      .t-display / .t-page / .t-section / .t-card / .t-label / .t-micro
+
+  Utilities (@utility composites)
+    .content-max      ~1280px centered max-width
+    .surface-card     16px-radius card, hairline border, no default shadow
+    .card-hover        adds .shadow-lift transition on hover
+    .btn / .btn-primary / .btn-secondary / .btn-sm   pill buttons (rounded-full)
+    .input            text input / select, hairline border, primary focus ring
+    .field            uppercase micro label above a form field
+    .chip             pill chip (demand signals, filters)
+    .hide-scrollbar   hides scrollbar cross-browser
+    .map-blob         focus-visible ring for skill-map hit targets
+
+================================================================================
+
+5. GLOBAL UI SHELL (NAV, FOOTER, LAYOUT)
+================================================================================
+
+  5a. Logo (src/components/Logo.tsx)
+      - Text logo "SkillMap" in the primary warm-red color.
+      - Links to /dashboard by default; accepts an href override.
+
+  5b. PublicNav (src/components/ui/PublicNav.tsx)
+      - Sticky top nav with logo, a pill catalog search (NavSearch — GETs `q`
+        to /dashboard/browse), nav links, a "Log in" link, a warm-red pill
+        "Get started" Sign-up link, and a mobile hamburger menu that reveals
+        the search + links. No ThemeToggle (dark mode removed).
+      - NavSearch is exported from this file and reused by AuthedHeader.
+
+  5c. SiteFooter (src/components/ui/SiteFooter.tsx, exports Footer)
+      - Light four-column footer: brand column (logo, blurb, copyright) plus
+        three link groups — "Learn", "Your learning", "Account". The old dark
+        band and its `tone` prop are gone.
+
+  5d. AuthedHeader (src/components/ui/AuthedHeader.tsx)
+      - Sticky top bar inside authenticated pages: logo (-> /dashboard), nav
+        links (Explore / Skill Map / Courses / My Learning, active-page
+        underline) plus an optional Admin link when `isAdmin` is true, a
+        pill catalog search (NavSearch), a notifications bell button, and
+        AccountMenu. No ThemeToggle.
+
+  5e. DashboardShell (src/components/dashboard/DashboardShell.tsx)
+      - The 248px collapsible left sidebar is gone. Renders <AuthedHeader>
+        at the top plus a scrollable content-max <main> area, and a fixed
+        mobile bottom nav bar (Explore, Skill Map, Courses, My Learning,
+        Profile) shown below the md breakpoint.
+
+================================================================================
+
+6. PUBLIC-FACING PAGES
+================================================================================
+
+  6a. Landing / Home — /
+      Two-column hero on the white canvas (no dark band): eyebrow
+      "MARKET-DRIVEN LEARNING", h1 "Learn what the market is actually hiring
+      for.", subhead, then btn-primary "Explore the Skill Map"
+      (-> /dashboard/skill-map) and btn-secondary "Browse courses"
+      (-> /dashboard/browse). Right of the hero is a warm rounded panel holding
+      three floating "demand pulse" pills built from the real top-3 skills by
+      demandScore, each linking to /skill/{slug}, dot + trend icon tinted by
+      demand tier.
+      Section: "Skills the market wants most" — horizontally scrolling
+      (hide-scrollbar) rail of the top 8 skills as demand chips linking to
+      /skill/{slug}, each with its score in an inset white pill.
+      Section: "The skill map" — renders <SkillTerritoryMap> of all skills,
+      each territory sized/colored by demand, with an "Open the full map" link.
+      Section: "How it works" — 3 steps (Read the demand / Pick a skill /
+      Learn it end to end) as three surface-cards on bg-surface.
+      Final CTA block: warm bg-surface panel, "Your next skill is already in
+      the market." + btn-primary "Start Learning Now" (-> /signup).
+      Stats line: territories · skills · courses (real counts, in the hero).
+      Note: the hero pills and chip rail link into /skill/{slug}, which sits
+      behind the auth middleware, so guests are bounced to /login first.
+
+  6b. Login — /login
+      <AuthShell eyebrow="Welcome back" title="Log in to SkillMap" subtitle=...>
+      with <LoginForm>. Two-panel split: form column + a warm brand column
+      (static copy + demand "pulse" chips, no live platform stats fetch).
+      Fields: email, password. Errors shown inline. Link to /signup.
+      On success -> /dashboard.
+
+  6c. Sign Up — /signup
+      <AuthShell eyebrow="Get started" title="Create your account" subtitle=...>
+      with <SignupForm>, same two-panel brand layout as Login.
+      Fields: full name, email, password (min 8, letter + number).
+      Duplicate email check. On success -> /dashboard.
+
+================================================================================
+
+7. DASHBOARD (AUTHENTICATED, AUTH)
+================================================================================
+
+  7a. Dashboard Home — /dashboard
+      Greeting "Good to see you, {name}".
+      "Continue learning" row (recent in-progress enrollments) or "Start
+      learning" CTA.
+      "Most in-demand courses" grid (getPopularCourses).
+      "Demand snapshot" — <DemandSnapshot> top-10 skills by demand with
+      Prev/Next pager and "X–Y of 47 skills" count.
+      "Browse catalog" CTA.
+
+  7b. Browse — /dashboard/browse
+      Catalog header + <BrowseControls> (q, category, level, sort).
+      Grid of <CourseCard> results from listCourses().
+
+  7c. My Courses — /dashboard/my-courses
+      "Library" header. "In progress" section and "Completed" section, each
+      a list of <Row> cards linking to /courses/{slug}/learn with progress
+      bar, %, time-ago enrollment/completion label, "Continue learning" or
+      "Review course" action text.
+
+  7d. Skill Map — /dashboard/skill-map
+      Full-page <SkillTerritoryMap>.
+
+  7e. Profile — /dashboard/profile
+      Avatar, name, email, role, member-since. Stats: Enrollments, Completed,
+      Lessons done. "Display name" <NameForm>. "Your reviews" list.
+
+  7f. Admin Studio — /dashboard/admin
+      Table of all courses (Edit / Delete). "New course" CTA.
+
+================================================================================
+
+8. COURSE PAGES & LEARNING FLOW
+================================================================================
+
+  8a. Course Detail — /courses/{slug}
+      Hero band (warm surface tint) with category/skill tags, title, headline,
+      meta line (level · duration · lesson count · review count).
+      "About this course" description.
+      "Curriculum" ordered list of lessons.
+      "Reviews" section with <ReviewForm> (if enrolled) and existing reviews.
+      Sidebar: <EnrollBox> (enroll/in-progress state, progress %, completed —
+      no price) plus a "What's included" list (lesson count, duration, level).
+
+  8b. Learning — /courses/{slug}/learn
+      <AuthedHeader>, course title, progress bar ("X% done", done/total).
+      Large <iframe> YouTube player (or text-lesson fallback).
+      Current lesson title + content.
+      Prev / Next links (or "Course complete" on last lesson).
+      <MarkCompleteButton> toggles lesson completion.
+      Right sidebar: lesson list — a text-success checkmark when done, the
+      current lesson highlighted bg-primary-tint/text-primary, others showing
+      their order number, each row with its duration.
+
+================================================================================
+
+9. SKILL PAGES & SKILL MAP
+================================================================================
+
+  9a. Skill Detail — /skill/{slug}
+      Behind requireAuth() + rendered with <AuthedHeader> (this page sits
+      behind the auth middleware, so it is not a <PublicNav> page).
+      Breadcrumb "Skill map", demand-tier badge, skill name, description.
+      Demand score (/100), rank among mapped skills, territory name (in the
+      description text).
+      Stat tiles: related-course count, enrolled learners (sum of course
+      popularity for that skill's courses).
+      "Courses for {skill}" grid of <CourseCard>.
+      "Where {skill} sits on the map" — <SkillTerritoryMap> with that skill
+      highlighted (activeSlug).
+
+  9b. Skill Territory Map — <SkillTerritoryMap>
+      Heatmap visualization of all skills sized/colored by demand.
+      Each skill is a circle; territories are grouped by category.
+      Tooltip/title shows demand score. In light mode uses multiply blend
+      and light background.
+      Clickable/selectable — clicking a skill shows its courses and links.
+
+================================================================================
+
+  9c. Skill map navigation model
+      There is ONE page that shows a skill in full: /skill/[slug]. It carries
+      the map (left), the skill panel (right) and the courses that teach the
+      skill (below). Every skill node on every map is a <Link> to
+      /skill/[slug], so choosing another skill is a real navigation and the
+      panel can never show stale content. /dashboard/skill-map is the browse
+      entry point: the same map, with an empty-state panel.
+      Both surfaces render through SkillMapStage, which owns the frame (map +
+      320px panel) and the "+N more" territory listing, so the map is the same
+      size on every page and that affordance works everywhere.
+      The map's own chrome (zoom controls, legend) sits at z-20 so the sticky
+      site header (z-40) always paints above it.
+
+10. ADMIN STUDIO (CRUD)
+================================================================================
+
+  10a. Admin Home — /dashboard/admin
+      Table: Course | Category | Level | Lessons | Enrolled | Status |
+      Actions(Edit,Delete). Empty state "No courses yet".
+
+  10b. New Course — /dashboard/admin/courses/new
+      <AdminCourseForm mode="create"> fields: title, headline, description,
+      skill dropdown, category, level, durationMin, imageColor preset,
+      category. No price field. Saves and redirects to edit page.
+
+  10c. Edit Course — /dashboard/admin/courses/{id}/edit
+      <AdminCourseForm mode="edit"> pre-filled with course data.
+      <LessonEditor> below it — list of lessons with inline Edit/Delete,
+      and an "Add lesson" form (title, durationMin, content, videoUrl).
+      "View course" + "Preview learning" links.
+
+================================================================================
+
+11. AUTHENTICATION & AUTHORIZATION
+================================================================================
+
+  - Auth lib (src/lib/auth.ts):
+      signup(name, email, password) — bcrypt hash(12), db.user.create,
+        createSession, redirect /dashboard.
+      login(email, password) — bcrypt.compare, rate-limited (10/10min),
+        createSession, redirect /dashboard.
+      logout() — deleteSession, redirect /login.
+      updateProfile(name) — update user name.
+
+  - Session lib (src/lib/session.ts):
+      createSession(userId, role) — JWT HS256, httpOnly cookie "session",
+        7-day expiry.
+      decrypt(session) — jwtVerify -> { userId, role, expiresAt }.
+      deleteSession().
+
+  - Auth guard (src/lib/dal.ts):
+      requireAuth() — decrypt session + db.user.findUnique; redirects /login.
+      requireAdmin() — requires role ADMIN; redirects /dashboard.
+      verifySession() — cached.
+
+  - Middleware (src/proxy.ts):
+      PUBLIC_PATHS = ["/", "/login", "/signup"].
+      Non-public, non-static, non-API routes: redirect to /login if no session;
+      redirect signed-in users off /login & / to /dashboard.
+      Matcher: everything except /api, _next/static, _next/image, static images.
+
+================================================================================
+
+12. CORE BUSINESS FLOW (USER JOURNEY)
+================================================================================
+
+  1. DISCOVER   — Land on / skill map heatmap or browse /dashboard/browse.
+  2. PICK       — Click a skill on the map -> /skill/{slug} to see courses.
+  3. ENROLL     — On /courses/{slug}, click "Enroll now" (-> enroll()).
+  4. LEARN      — Go to /courses/{slug}/learn; watch video/text lessons;
+                  click "Mark complete" (toggleLessonComplete).
+  5. TRACK      — Progress bar, % complete, lesson counter, My Courses.
+  6. COMPLETE   — When all lessons done, "Course complete" -> /courses/{slug}.
+  7. REVIEW     — On course page, leave a rating + comment (reviewCourse).
+  8. MANAGE     — Admins create/edit/delete courses & lessons via /dashboard/admin.
+
+================================================================================
+
+13. KEY SERVER ACTIONS & DATA HOOKS
+================================================================================
+
+  Data hooks (src/lib/data.ts, server-only):
+    listCourses(filters?)  — paginated published courses with search/sort.
+    getCourseBySlug(slug)  — full course + lessons + reviews + avgRating.
+    getSkills()            — all skills ordered by demandScore.
+    getSkillBySlug(slug)   — single skill.
+    getCoursesBySkill(s)   — published courses for a skill.
+    getMyEnrollments()     — current user's enrollments + course summaries.
+    getRecentEnrollments(u,take) — in-progress enrollments for dashboard.
+    getCategories()        — distinct published course categories.
+    getPlatformStats()     — { skills, courses } counts.
+    getSkillOptions()      — skill id/name/category for admin dropdowns.
+    getPopularCourses(t)   — top courses by enrollment.
+    getMyEnrollmentForCourse(u,c) — enrollment record.
+    getCourseForLearning(u,slug) — course + lessons + done set for learning.
+    getAdminCourses()      — all courses for admin table.
+    getCourseForEdit(id)   — course + lessons + skill for edit page.
+    getProfileData(u)      — user + review history + stats.
+
+  Server actions (src/lib/courses.ts, "use server"):
+    createCourse(form) / updateCourse(id, form) / deleteCourse(id)
+    addLesson(courseId, form) / updateLesson(id, form) / deleteLesson(id)
+    enroll(courseId)
+    toggleLessonComplete(lessonId, courseId)
+    reviewCourse(courseId, form)
+
+  Auth actions (src/lib/auth.ts):
+    signup / login / logout / updateProfile
+
+================================================================================
+
+14. COMPONENT CATALOGUE
+================================================================================
+
+  Auth:
+    LoginForm, SignupForm, AuthShell, AccountMenu, NameForm
+
+  UI primitives (shadcn-style):
+    Logo, PublicNav, AuthedHeader, DashboardShell, SiteFooter, ProgressBar,
+    Button variants (.btn/.btn-primary/.btn-secondary/.btn-sm),
+    inputs (.field/.input), .chip (pill for demand signals & filters)
+    (ThemeToggle deleted — dark mode removed)
+
+  Dashboard:
+    DemandSnapshot (top-10 demand list + pager)
+
+  Skill map:
+    SkillTerritoryMap (heatmap of skills by demand)
+
+  Courses:
+    CoursePlate (src/components/courses/CoursePlate.tsx) — shared tinted
+      "plate" standing in for course artwork: a warm tint bloom over the
+      surface ramp with the course's initials ghosted into it. Exports
+      CoursePlate and tintFor. Used by CourseCard, dashboard home
+      (src/app/dashboard/page.tsx), and My Courses
+      (src/app/dashboard/my-courses/page.tsx). Replaces the old per-file
+      PALETTES/gradientFor gradient tables.
+    CourseCard (built on CoursePlate via tintFor, skillName, popularity),
+    EnrollBox (enroll, progress, continue/review CTA — no price),
+    ReviewForm (star radio group + comment), MarkCompleteButton
+
+  Browse:
+    BrowseControls (search, category, level, sort)
+
+  Admin:
+    AdminCourseForm (create/edit course), LessonEditor (CRUD lessons),
+    DeleteCourseButton (with confirm)
+
+  Profile:
+    NameForm
+
+================================================================================
+
+15. ROUTE MAP (ALL PAGES)
+================================================================================
+
+  /                           Landing page (public)
+  /login                      Login (public)
+  /signup                     Sign up (public)
+  /dashboard                  Authenticated dashboard home
+  /dashboard/browse           Course catalog (authenticated)
+  /dashboard/my-courses       My courses / library (authenticated)
+  /dashboard/profile          User profile (authenticated)
+  /dashboard/skill-map        Full skill map (authenticated)
+  /dashboard/admin            Admin studio overview (admin)
+  /dashboard/admin/courses/new        Create course (admin)
+  /dashboard/admin/courses/[id]/edit  Edit course + lessons (admin)
+  /courses/[slug]             Course detail (authenticated)
+  /courses/[slug]/learn       Learning player (authenticated)
+  /skill/[slug]               Skill detail page (authenticated)
+
+  Middleware-excluded (no auth):
+    /api/*, _next/static, _next/image, static image assets, /favicon.ico
+
+================================================================================
+
+16. RUNNING THE PROJECT
+================================================================================
+
+  Dev server:
+    npx next dev            (Turbopack, port 3000)
+    PORT=3000 npx next dev -p 3000
+
+  Build & typecheck:
+    npx tsc --noEmit
+    npx eslint
+    npm run build
+
+  Seeding data:
+    npx tsx prisma/seed.ts
+    Course.durationMin is now derived by summing its lessons' durations
+    (no per-course durationMin literals in the seed data), so the hero
+    figure and the curriculum subtotal always agree.
+    Lesson videos come from prisma/lesson-videos.ts (takes precedence over
+    inline seed ids); it was re-audited against the real YouTube oEmbed API
+    and 38 of 202 lesson videos were replaced with verified, topically
+    relevant ones — see VIDEO_AUDIT.md for the full replacement log.
+
+  Environment:
+    .env at repo root:
+      DATABASE_URL="file:./dev.db"
+      SESSION_SECRET="<64-char base64>"
+    Runtime DB: dev.db (repo root).
+
+================================================================================
+END OF BREAKDOWN
+================================================================================
